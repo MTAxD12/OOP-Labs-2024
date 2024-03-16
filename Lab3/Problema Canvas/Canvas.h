@@ -1,18 +1,18 @@
 #pragma once
-class Canvas
-{
-    int latime;
-    int inaltime;
+class Canvas {
     char** canvasDesen;
-
+    int lines;
+    int columns;
 public:
-    Canvas(int latime, int inaltime);
-    void DrawCircle(int x, int y, int ray, char ch);
-    void FillCircle(int x, int y, int ray, char ch);
-    void DrawRect(int left, int top, int right, int bottom, char ch);
-    void FillRect(int left, int top, int right, int bottom, char ch);
-    void SetPoint(int x, int y, char ch);
-    void DrawLine(int x1, int y1, int x2, int y2, char ch);
-    void Print(); // shows what was printed
-    void Clear(); // clears the canvas
+    // contructor will call the clear method
+    Canvas(int lines, int columns);
+
+    // set the character at the position x and y to value
+    void set_pixel(int x, int y, char value);
+
+    // tuples of x, y, value
+    void set_pixels(int count, ...);
+
+    void clear();
+    void print() const;
 };
