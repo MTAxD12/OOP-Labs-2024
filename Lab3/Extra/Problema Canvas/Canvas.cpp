@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <Windows.h>
 
-Canvas::Canvas(int columns, int lines)
+Canvas::Canvas(int lines, int columns)
 {
 	this->columns = columns;
 	this->lines = lines;
@@ -16,12 +16,12 @@ Canvas::Canvas(int columns, int lines)
 		for (int j = 0; j < columns; j++)
 			canvasDesen[i][j] = ' ';
 	}
-	clear();
+	//printf("lines: %d, columns: %d", lines, columns);
 }
 
 void Canvas::set_pixel(int x, int y, char ch)
 {
-	if (x >= 0 && x <= columns && y >= 0 && y <= lines)
+	if ((x >= 0 && x <= columns) && (y >= 0 && y <= lines))
 		canvasDesen[y][x] = ch;
 	else
 		return;
@@ -37,7 +37,7 @@ void Canvas::set_pixels(int count, ...)
 		int x = va_arg(param, int);
 		int y = va_arg(param, int);
 		char c = va_arg(param, char);
-		set_pixel(x, y, c);
+		set_pixel(y, x, c);
 	}
 }
 
