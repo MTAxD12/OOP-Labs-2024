@@ -4,14 +4,21 @@ Number Get(Number ex) { return ex; }
 
 int main()
 {
-    Number n1("101011111111111111001", 2);
+    Number n1("344", 10);
     n1.Print();
-    n1.SwitchBase(10);
+    n1.SwitchBase(8);
     n1.Print();
-    n1.SwitchBase(16);
+   
+    Number n2(344);
+    n2.Print();
+    n2.SwitchBase(8);
+    n2.Print();
+
+    if (n1 <= 344)
+        printf("da\n");
+    else
+        printf("nu\n");
+
     n1.Print();
-    n1.SwitchBase(4);
-    n1.Print();
-    n1.SwitchBase(2);
-    n1.Print();
+    n2.Print();
 }

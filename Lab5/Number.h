@@ -6,11 +6,10 @@ class Number
 	int count;
 
 public:
-	Number();
 	Number(const char* numar, int baza); //default constructor
 	Number(int ex);
 	Number(const Number& ex); //copy constructor
-	Number(const Number&& ex); //move constructor
+	Number(const Number&& ex) noexcept; //move constructor
 	~Number();
 
 	//cum suprascriu un operator?
@@ -45,6 +44,7 @@ public:
 	bool operator>=(int numar);
 	bool operator==(int numar);
 
+	void SwitchBaseAux(Number &nmb, int newBase);
 	void SwitchBase(int newBase);
 	void Print();
 	int  GetDigitsCount(); 
