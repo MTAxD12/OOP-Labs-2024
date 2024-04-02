@@ -27,8 +27,6 @@ public:
 	void operator--(); //pentru --Number
 	void operator--(int numar); //pentru Number--
 
-
-	bool operator!();
 	int operator[](int index); //index operator
 
 	Number& operator=(Number&& ex) noexcept; //move asignment operator
@@ -44,7 +42,7 @@ public:
 	bool operator>=(int numar);
 	bool operator==(int numar);
 
-	void SwitchBaseAux(Number &nmb, int newBase);
+	//void SwitchBaseAux(Number &nmb, int newBase);
 	void SwitchBase(int newBase);
 	void Print();
 	int  GetDigitsCount(); 

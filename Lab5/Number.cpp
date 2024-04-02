@@ -1,4 +1,4 @@
-#define _CRT_SECURE_NO_WARNINGS
+﻿#define _CRT_SECURE_NO_WARNINGS
 #include "Number.h"
 #include <iostream>
 #include <string>
@@ -28,21 +28,24 @@ int countNr(int nr) {
 
 char* numToChar(int nr) {
 	int countA = countNr(nr), i = 0;
-	char* numar, *numarAux;
+	char *numarAux;
 	numarAux = new char[countA + 1];
-	numar = new char[countA + 1];
 	while (nr)
 	{
 		numarAux[i++] = nr % 10 + '0';
 		nr /= 10;
 	}
-	for (int i = countA - 1; i >= 0; i--)
-	{
-		numar[i] = numarAux[countA - 1 - i];
+	numarAux[countA] = '\0';
+	return numarAux;
+}
+
+long long int charToInt(char* numar) {
+	int count = strlen(numar), numarInt = 0;
+	for (int i = count - 1; i >= 0; i--) {
+		numarInt = (numarInt * 10) + numar[i] - '0';
 	}
-	delete[] numarAux;
-	numar[countA] = '\0';
-	return numar;
+
+	return numarInt;
 }
 
 Number::Number(int numar) {
@@ -92,15 +95,45 @@ Number::~Number() {
 }
 
 Number Number::operator+(Number ex) {
-    // Convert both numbers to base 10 for addition
-    int num1 = std::stoi(this->numarChar, nullptr, this->baza);
-    int num2 = std::stoi(ex.numarChar, nullptr, ex.baza);
+	int lgMax = 0, bazaMax, baza1 = this->baza, baza2 = ex.baza;
 
-    // Perform addition in base 10
-    int result = num1 + num2;
+	if (this->baza >= ex.baza) bazaMax = this->baza, ex.SwitchBase(bazaMax);
+	else bazaMax = ex.baza, this->SwitchBase(bazaMax);
 
-    // Convert result back to the base of the larger base among the two numbers
-    int newBase = std::max(this->baza, ex.baza);
+	if (this->count >= ex.count) lgMax = this->count;
+	else lgMax = ex.count; lgMax++;
+
+	char* rezultat = new char[lgMax + 1];
+	for (int i = 0; i < lgMax; i++)
+		rezultat[i] = '0';
+
+	int carry = 0, index = lgMax - 1;
+
+	for (int i = this->count, j = ex.count; i >= 0 || j >= 0 || carry; --i, --j, --index) {
+		int cifra1, cifra2;
+		if (i >= 0) cifra1 = this->numarChar[i] - '0';
+		else cifra1 = 0;
+		if (j >= 0) cifra2 = ex.numarChar[j] - '0';
+		else cifra2 = 0;
+
+		int suma = cifra1 + cifra2 + carry;
+		carry = suma / 10;
+		rezultat[index] = (suma % 10) + '0';
+	}
+	
+
+	if (rezultat[0] == '0') 
+		for (int i = 0; i < lgMax; i++)
+			this->numarChar[i] = rezultat[i + 1];
+	else
+		for (int i = 0; i < lgMax; i++)
+			this->numarChar[i] = rezultat[i];
+
+	delete[] rezultat;
+
+	if (baza1 > baza2)
+		ex.SwitchBase(baza2);
+
 	return *this;
 }
 
@@ -129,44 +162,53 @@ Number Number::operator-(Number ex) {
 }
 
 void Number::operator++() {
-    // Increment the number
-    int num = std::stoi(this->numarChar, nullptr, this->baza) + 1;
-    //*this = Number(num).SwitchBase(this->baza);
+	if (this->numarChar[this->count - 1] < (this->baza <= 10 ? '9' : 'F')) {
+		++this->numarChar[this->count - 1];
+	}
+	else {
+		int index = this->count - 1;
+		while (index >= 0 && (this->numarChar[index] == '9' || this->numarChar[index] == 'F')) {
+			this->numarChar[index] = '0';
+			--index;
+		}
+		if (index < 0) {
+			char* newNumarChar = new char[this->count + 2];
+			newNumarChar[0] = (this->baza <= 10) ? '1' : 'A';
+			std::fill_n(newNumarChar + 1, this->count + 1, '0');
+			std::copy(this->numarChar, this->numarChar + this->count, newNumarChar + 1);
+			delete[] this->numarChar;
+			this->numarChar = newNumarChar;
+			++this->count;
+		}
+		else {
+			++this->numarChar[index];
+		}
+	}
 }
 
 void Number::operator++(int numar) {
-    // Increment the number
-    int num = std::stoi(this->numarChar, nullptr, this->baza) + 1;
-    //*this = Number(num).SwitchBase(this->baza);
+	Number temp(*this);
+	++(*this);
 }
 
 void Number::operator--() {
-    // Decrement the number
-    int num = std::stoi(this->numarChar, nullptr, this->baza) - 1;
-   //*this = Number(num).SwitchBase(this->baza);
+	for (int i = 0; i < count - 1; i++)
+		this->numarChar[i] = this->numarChar[i + 1];
+	this->numarChar[count-1] = '\0';
+	--this->count;
 }
 
 void Number::operator--(int numar) {
-    // Decrement the number
-    int num = std::stoi(this->numarChar, nullptr, this->baza) - 1;
-    //*this = Number(num).SwitchBase(this->baza);
-}
-
-bool Number::operator!() {
-    // Check if the number is zero
-    int num = std::stoi(this->numarChar, nullptr, this->baza);
-    return num == 0;
+	if (this->count)
+		this->numarChar[this->count - 1] = '\0';
+	this->count = this->count - 1;
 }
 
 int Number::operator[](int index) {
-    // Return the digit at the given index
-    if (index >= 0 && index < this->count)
-        return this->numarChar[index] - '0';
-    return -1;
+	return this->numarChar[index];	
 }
 
 Number& Number::operator=(Number&& ex) noexcept {
-    // Move assignment operator
     if (this != &ex) {
         delete[] this->numarChar;
         this->numarChar = ex.numarChar;
@@ -182,8 +224,8 @@ Number& Number::operator=(Number&& ex) noexcept {
 bool Number::operator<(Number ex) {
     
 	int baza1 = this->baza, baza2 = ex.baza;
-	SwitchBaseAux(*this, 10);
-	SwitchBaseAux(ex, 10);
+	this->SwitchBase(10);
+	ex.SwitchBase(10);
 
 	if (this->count > ex.count) {
 		return false;
@@ -201,14 +243,14 @@ bool Number::operator<(Number ex) {
 		}
 		return false; 
 	}
-	SwitchBaseAux(*this, baza1);
-	SwitchBaseAux(ex, baza2);
+	this->SwitchBase(baza1);
+	ex.SwitchBase(baza2);
 }
 
 bool Number::operator>(Number ex) {
 	int baza1 = this->baza, baza2 = ex.baza;
-	SwitchBaseAux(*this, 10);
-	SwitchBaseAux(ex, 10);
+	this->SwitchBase(10);
+	ex.SwitchBase(10);
     
 	if (this -> count > ex.count) {
 		return true;
@@ -226,14 +268,14 @@ bool Number::operator>(Number ex) {
 		}
 		return false;
 	}
-	SwitchBaseAux(*this, baza1);
-	SwitchBaseAux(ex, baza2);
+	this->SwitchBase(baza1);
+	ex.SwitchBase(baza2);
 }
 
 bool Number::operator<=(Number ex) {
 	int baza1 = this->baza, baza2 = ex.baza;
-	SwitchBaseAux(*this, 10);
-	SwitchBaseAux(ex, 10);
+	this->SwitchBase(10);
+	ex.SwitchBase(10);
 
 	if (this->count > ex.count) {
 		return false;
@@ -251,14 +293,14 @@ bool Number::operator<=(Number ex) {
 		}
 		return true;
 	}
-	SwitchBaseAux(*this, baza1);
-	SwitchBaseAux(ex, baza2);
+	this->SwitchBase(baza1);
+	ex.SwitchBase(baza2);
 }
 
 bool Number::operator>=(Number ex) {
 	int baza1 = this->baza, baza2 = ex.baza;
-	SwitchBaseAux(*this, 10);
-	SwitchBaseAux(ex, 10);
+	this->SwitchBase(10);
+	ex.SwitchBase(10);
 
 	if (this->count > ex.count) {
 		return true;
@@ -276,14 +318,14 @@ bool Number::operator>=(Number ex) {
 		}
 		return true;
 	}
-	SwitchBaseAux(*this, baza1);
-	SwitchBaseAux(ex, baza2);
+	this->SwitchBase(baza1);
+	ex.SwitchBase(baza2);
 }
 
 bool Number::operator==(Number ex) {
 	int baza1 = this->baza, baza2 = ex.baza;
-	SwitchBaseAux(*this, 10);
-	SwitchBaseAux(ex, 10);
+	this->SwitchBase(10);
+	ex.SwitchBase(10);
 
 	if (this->count == ex.count) {
 		for (int i = 0; i < count; i++)
@@ -296,13 +338,13 @@ bool Number::operator==(Number ex) {
 	else {
 		return false;
 	}
-	SwitchBaseAux(*this, baza1);
-	SwitchBaseAux(ex, baza2);
+	this->SwitchBase(baza1);
+	ex.SwitchBase(baza2);
 }
 
 bool Number::operator<(int numar) {
 	int baza1 = this->baza, count2 = countNr(numar);
-	SwitchBaseAux(*this, 10);
+	this->SwitchBase(10);
 	char* numarAux; numarAux = new char[count2];
 	numarAux = numToChar(numar);
 
@@ -322,12 +364,12 @@ bool Number::operator<(int numar) {
 		}
 		return false;
 	}
-	SwitchBaseAux(*this, baza1);
+	this->SwitchBase(baza1);
 }
 
 bool Number::operator>(int numar) {
 	int baza1 = this->baza, count2 = countNr(numar);
-	SwitchBaseAux(*this, 10);
+	this->SwitchBase(10);
 	char* numarAux; numarAux = new char[count2];
 	numarAux = numToChar(numar);
 
@@ -347,12 +389,12 @@ bool Number::operator>(int numar) {
 		}
 		return false;
 	}
-	SwitchBaseAux(*this, baza1);
+	this->SwitchBase(baza1);
 }
 
 bool Number::operator<=(int numar) {
 	int baza1 = this->baza, count2 = countNr(numar);
-	SwitchBaseAux(*this, 10);
+	this->SwitchBase(10);
 	char* numarAux; numarAux = new char[count2];
 	numarAux = numToChar(numar);
 
@@ -372,12 +414,12 @@ bool Number::operator<=(int numar) {
 		}
 		return true;
 	}
-	SwitchBaseAux(*this, baza1);
+	this->SwitchBase(baza1);
 }
 
 bool Number::operator>=(int numar) {
 	int baza1 = this->baza, count2 = countNr(numar);
-	SwitchBaseAux(*this, 10);
+	this->SwitchBase(10);
 	char* numarAux; numarAux = new char[count2];
 	numarAux = numToChar(numar);
 
@@ -398,12 +440,12 @@ bool Number::operator>=(int numar) {
 		}
 		return false;
 	}
-	SwitchBaseAux(*this, baza1);
+	this->SwitchBase(baza1);
 }
 
 bool Number::operator==(int numar) {
 	int baza1 = this->baza, count2 = countNr(numar);
-	SwitchBaseAux(*this, 10);
+	this->SwitchBase(10);
 	char* numarAux; numarAux = new char[count2];
 	numarAux = numToChar(numar);
 
@@ -418,16 +460,66 @@ bool Number::operator==(int numar) {
 	else {
 		return false;
 	}
-	SwitchBaseAux(*this, baza1);
+	this->SwitchBase(baza1);
 }
 
 int operator-(Number ex, int numar) {
-    // Subtract the integer from the number
-    int num1 = std::stoi(ex.numarChar, nullptr, ex.baza);
-    return num1 - numar;
+	int bazaInit = ex.baza;
+	ex.SwitchBase(10);
+
+	int countA = countNr(numar);
+	char* numarAux = new char[countA + 1];
+	numarAux = numToChar(numar);
+
+	int lgMax;
+	if (ex.count > countA) lgMax = ex.count;
+	else lgMax = countA;
+
+	char* rezultat = new char[lgMax + 1];
+
+	for (int i = 0; i < lgMax; i++)
+		rezultat[i] = '0';
+	rezultat[lgMax] = '\0';
+
+	int carry = 0;
+	for (int i = 0; i < lgMax; ++i) {
+		int cifra1, cifra2;
+		if (i < ex.count)
+			cifra1 = (ex.numarChar[ex.count - 1 - i] - '0');
+		else 
+			cifra1 = 0;
+
+		if (i < countA)
+			cifra2 = (numarAux[countA - 1 - i] - '0');
+		else
+			cifra2 = 0;
+
+		int dif = cifra1 - cifra2 - carry;
+		if (dif < 0) {
+			dif += 10;
+			carry = 1;
+		}
+		else {
+			carry = 0;
+		}
+
+		rezultat[lgMax - 1 - i] = dif + '0';
+	}
+
+	int zerouri = 0;
+	while (zerouri < lgMax && rezultat[zerouri] == '0') {
+		++zerouri;
+	}
+
+	if (zerouri > 0) {
+		memmove(rezultat, rezultat + zerouri, lgMax - zerouri + 1);
+	}
+	
+	ex.SwitchBase(bazaInit);
+	return charToInt(rezultat);
 }
 
-void Number::SwitchBaseAux(Number &nmb, int newBase) {
+/*void Number::SwitchBaseAux(Number& nmb, int newBase) {
 	if (newBase < 2 || newBase > 16) {
 		printf("Baza invalida\n");
 		return;
@@ -446,7 +538,8 @@ void Number::SwitchBaseAux(Number &nmb, int newBase) {
 			cifra = nmb.numarChar[i] - 'A' + 10;
 		}
 		else {
-			printf("Numarul dat nu contine doar cifre\n");
+			printf("Numarul dat nu contine doar cifre\n")
+			cifra  ;
 			return;
 		}
 
@@ -474,6 +567,7 @@ void Number::SwitchBaseAux(Number &nmb, int newBase) {
 	nmb.baza = newBase;
 	nmb.count = digits;
 }
+*/
 
 void Number::SwitchBase(int newBase) {
 	if (newBase < 2 || newBase > 16) {
