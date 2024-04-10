@@ -26,5 +26,5 @@ int main() {
 
     //std::cout << "Top node has " << (unsigned)*object << " subnodes\n";
 
-    object->print(std::cout);
+    object->print(std::cout, 0);
 }

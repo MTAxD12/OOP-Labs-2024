@@ -1,10 +1,16 @@
-#include "clase_json.h"
+﻿#include "clase_json.h"
 
 JsonValue::~JsonValue() {};
 
+void addIndentation(std::ostream& out, int level) {
+    for (int i = 0; i < level; ++i) {
+        out << "    "; // Add 4 spaces for each level
+    }
+}
+
 //NullValue
 
-void NullValue::print(std::ostream& out) const {
+void NullValue::print(std::ostream& out, int level) const {
 	out << "null";
 };
 
@@ -12,7 +18,7 @@ void NullValue::print(std::ostream& out) const {
 //NumberValue
 NumberValue::NumberValue(int num) {nr = num;};
 
-void NumberValue::print(std::ostream& out) const {
+void NumberValue::print(std::ostream& out, int level) const {
 	out << nr;
 };
 
@@ -30,7 +36,7 @@ StringValue::StringValue(const char* val) {
     string[count] = '\0';
 };
 
-void StringValue::print(std::ostream& out) const {
+void StringValue::print(std::ostream& out, int level) const {
 	out << "\"" << string << "\"";
 }
 
@@ -38,7 +44,7 @@ void StringValue::print(std::ostream& out) const {
 //BoolValue
 BoolValue::BoolValue(bool cond) { val = cond; }
 
-void BoolValue::print(std::ostream& out) const {
+void BoolValue::print(std::ostream& out, int level) const {
 	out << val;
 };
 
@@ -52,15 +58,18 @@ void ArrayValue::add(JsonValue* value) {
     elemente[size++] = value;
 };
 
-void ArrayValue::print(std::ostream& out) const {
-    out << "[";
+void ArrayValue::print(std::ostream& out, int level) const {
+    out << "[\n";
     for (unsigned int i = 0; i < size; ++i) {
-        elemente[i]->print(out);
+        addIndentation(out, level + 1);
+        elemente[i]->print(out, level + 1); // Printează elementul cu un nivel de indentare mai mare
         if (i != size - 1)
             out << ", ";
+        out << "\n";
     }
+    addIndentation(out, level);
     out << "]";
-};
+}
 
 
 //ObjectValue
@@ -72,9 +81,10 @@ void ObjectValue::add(const char* name, JsonValue* value) {
     perechi[size++] = std::make_pair(name, value);
 };
 
-void ObjectValue::print(std::ostream& out) const {
-    out << "{";
+void ObjectValue::print(std::ostream& out, int level) const {
+    out << "{\n";
     for (unsigned int i = 0; i < size; i++) {
+        addIndentation(out, level + 1);
         out << "\"" << perechi[i].first << "\": ";
         if (typeid(*(perechi[i].second)) == typeid(BoolValue)) {
             BoolValue* boolValue = dynamic_cast<BoolValue*>(perechi[i].second);
@@ -84,10 +94,14 @@ void ObjectValue::print(std::ostream& out) const {
             }
         }
         else {
-            perechi[i].second->print(out);
+            perechi[i].second->print(out, level + 1);
         }
+
         if (i != size - 1)
             out << ", ";
+        out << "\n";
     }
+    addIndentation(out, level);
     out << "}";
-};
+}
+
