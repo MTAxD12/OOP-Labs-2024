@@ -30,8 +30,8 @@ public:
 };
 
 class BoolValue : public JsonValue {
-    bool val;
 public:
+    bool val;
     BoolValue(bool valoare);
     void print(std::ostream& out) const override;
 };

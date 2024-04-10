@@ -76,36 +76,18 @@ void ObjectValue::print(std::ostream& out) const {
     out << "{";
     for (unsigned int i = 0; i < size; i++) {
         out << "\"" << perechi[i].first << "\": ";
-        if (typeid(perechi[i].second) == typeid(bool))
-            if (perechi[i].second) out << "true";
-            else out << "false";
-        else
+        if (typeid(*(perechi[i].second)) == typeid(BoolValue)) {
+            BoolValue* boolValue = dynamic_cast<BoolValue*>(perechi[i].second);
+            if (boolValue != nullptr) {
+                if (boolValue) out << "true";
+                else out << "false";
+            }
+        }
+        else {
             perechi[i].second->print(out);
+        }
         if (i != size - 1)
             out << ", ";
     }
     out << "}";
 };
-/*
-unsigned int countNodes(const JsonValue* value) {
-    const ObjectValue* object = dynamic_cast<const ObjectValue*>(value);
-    if (object) {
-        unsigned int count = 1; // count for the object itself
-        for (const auto& pair : object) {
-            count += countNodes(pair.second.get());
-        }
-        return count;
-    }
-
-    const ArrayValue* array = dynamic_cast<const ArrayValue*>(value);
-    if (array) {
-        unsigned int count = 1; // count for the array itself
-        for (const auto& element : array) {
-            count += countNodes(element.get());
-        }
-        return count;
-    }
-
-    return 1; // for null, number, bool, and string
-}
-*/
