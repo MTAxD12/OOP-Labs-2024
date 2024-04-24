@@ -52,7 +52,9 @@ public:
         if (parent == nullptr)
             return this->rad;
         else
-            return parent;
+        {
+            return *parent->copii;
+        }
     }
     void delete_node(Node<T, maxCopii>* parent) {
         for (int i = 0; i < parent->nrCopii; i++)

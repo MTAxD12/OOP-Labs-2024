@@ -18,8 +18,9 @@ int main() {
     printf("copil1 al radacinii %d\n", parentC1->val);
 
     printf("copii lui c1: ");
-    for (int i = 0; i < parentC1->nrCopii; i++) 
-        printf("%d, ", parentC1->copii[i]->val);
+    auto copiiParent = tree.get_node(parent);
+    for (int i = 0; i < parent->nrCopii; i++) 
+        printf("%d, ", copiiParent[i].val);
 
     if (tree.find([](const int& val) { return val == 24; }, parent))
     {
