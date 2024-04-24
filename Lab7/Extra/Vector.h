@@ -56,18 +56,26 @@ public:
     }
 
     void sort(std::function<int(const T&, const T&)> cmp) {
-        for (int i = 0; i < size - 1; ++i) 
-            for (int j = i + 1; j < size; ++j) 
-                if (cmp(elemente[i], elemente[j]) == 0) 
-                    std::swap(elemente[i], elemente[j]); // nu iese cu cmp ints
+        for (int i = 0; i < size - 1; ++i) {
+            for (int j = i + 1; j < size; ++j) {
+                if (cmp != nullptr) {
+                    if (cmp(elemente[i], elemente[j]) <= 0)
+                        std::swap(elemente[i], elemente[j]); // nu iese cu cmp ints
+                }
+                else {
+                    if (elemente[i] > elemente[j])
+                        std::swap(elemente[i], elemente[j]);
+                }
+            }
+        }
     }
-
+    
     void sort() {
         sort([](const T& a, const T& b) {
             return a < b;
             });
     }
-
+    
     void print() {
         for (int i = 0; i < size; i++)
             std::cout << i << " - " << this->elemente[i] << "\n"; // nu am folosit printf ptr ca nu stiu ce tip de element e
