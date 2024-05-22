@@ -43,12 +43,14 @@ public:
 	}
 
 	void Set(Key k, Value v) {
-		if (this->counter < this->capacity) {
-			this->v[this->counter].key = k;
-			this->v[this->counter].value = v;
-			this->v[this->counter].index = this->counter;
+		for (int i = 0; i < this->counter; i++) {
+			if (this->v[i].key == k) {
+				this->v[i].value = v; 
+				return; 
+			}
 		}
-		else {
+
+		if (this->counter == this->capacity) {
 			Pair* newV = new Pair[this->capacity * 2];
 			for (int i = 0; i < this->counter; i++) {
 				newV[i] = this->v[i];
@@ -56,12 +58,14 @@ public:
 			delete[] this->v;
 			this->v = newV;
 			this->capacity *= 2;
-			this->v[this->counter].key = k;
-			this->v[this->counter].value = v;
-			this->v[this->counter].index = this->counter;
 		}
+
+		this->v[this->counter].key = k;
+		this->v[this->counter].value = v;
+		this->v[this->counter].index = this->counter;
 		this->counter++;
 	}
+
 
 	bool Get(const Key& k, const Value& v) {
 		for (int i = 0; i < this->counter; i++) {
@@ -140,6 +144,7 @@ int main()
     }
 	printf("\n");
 
+	m.Set(30, "adam");
 	m.Set(35, "123");
 	m.Set(40, "Daniel");
 
@@ -149,7 +154,7 @@ int main()
 	}
 
 	printf("Count: %d\n", m.Count());
-	printf("\n%d\n", m.Get(30, "Poo"));
+	printf("\n%d\n", m.Get(30, "adam"));
 	printf("%d\n\n", m.Get(30, "tessss"));
 
 	m.Delete(30);
